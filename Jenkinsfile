@@ -1,5 +1,10 @@
 pipeline {
     agent any
+    options { skipDefaultCheckout(true) }
+
+    tools {
+        maven 'M3'
+    }
 
     stages {
         stage('Checkout') {
