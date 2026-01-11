@@ -6,6 +6,10 @@ pipeline {
         maven 'M3'
     }
 
+    environment {
+        SLACK_WEBHOOK = credentials('SLACK_WEBHOOK')
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +19,6 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn -v'
                 sh 'mvn clean package'
             }
         }
@@ -24,6 +27,23 @@ pipeline {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
+        }
+    }
+
+    post {
+        success {
+            sh """
+            curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"✅ Pipeline Jenkins réussi : PipeLine-Samia-ElAmarti"}' \
+            $SLACK_WEBHOOK
+            """
+        }
+        failure {
+            sh """
+            curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"❌ Pipeline Jenkins échoué : PipeLine-Samia-ElAmarti"}' \
+            $SLACK_WEBHOOK
+            """
         }
     }
 }
